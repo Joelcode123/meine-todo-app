@@ -1,0 +1,645 @@
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111827">
+<title>Meine To-do App</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f4f6;
+    color: #111827;
+}
+
+header {
+    background: #111827;
+    color: white;
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.menu-button {
+    background: #374151;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.layout {
+    display: flex;
+    min-height: calc(100vh - 64px);
+}
+
+.sidebar {
+    width: 230px;
+    background: #1f2937;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    font-size: 16px;
+    margin-top: 0;
+}
+
+.table-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.table-button {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 7px;
+    background: #374151;
+    color: white;
+    text-align: left;
+    cursor: pointer;
+}
+
+.table-button:hover,
+.table-button.active {
+    background: #4b5563;
+}
+
+.add-table {
+    margin-top: 15px;
+    width: 100%;
+    padding: 11px;
+    border: 2px dashed #6b7280;
+    border-radius: 7px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+}
+
+.main {
+    flex: 1;
+    padding: 30px;
+    overflow-x: auto;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.topbar h2 {
+    margin: 0;
+}
+
+.delete-table {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.todo-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th {
+    background: #e5e7eb;
+    padding: 13px;
+    text-align: left;
+}
+
+td {
+    border-top: 1px solid #e5e7eb;
+    padding: 0;
+}
+
+.todo-input {
+    width: 100%;
+    border: none;
+    padding: 14px;
+    font-size: 15px;
+    outline: none;
+}
+
+.todo-input:focus {
+    background: #f9fafb;
+}
+
+.checkbox-cell {
+    text-align: center;
+    width: 120px;
+}
+
+.checkbox-cell input {
+    width: 19px;
+    height: 19px;
+    cursor: pointer;
+}
+
+.completed .todo-input {
+    text-decoration: line-through;
+    color: #9ca3af;
+}
+
+.urgent {
+    background: #fef2f2;
+}
+
+.less-urgent {
+    background: #fffbeb;
+}
+
+.add-row {
+    width: 100%;
+    border: none;
+    padding: 14px;
+    background: #f9fafb;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.add-row:hover {
+    background: #e5e7eb;
+}
+
+.modal-background {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.modal {
+    background: white;
+    width: min(400px, 90%);
+    padding: 25px;
+    border-radius: 12px;
+}
+
+.modal h3 {
+    margin-top: 0;
+}
+
+.modal input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.modal-buttons button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.cancel {
+    background: #e5e7eb;
+}
+
+.confirm {
+    background: #111827;
+    color: white;
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        width: 180px;
+    }
+
+    .main {
+        padding: 15px;
+    }
+
+    header {
+        padding: 15px;
+    }
+
+    .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Meine To-do App</h1>
+    <button class="menu-button" onclick="toggleSidebar()">☰ Menü</button>
+</header>
+
+<div class="layout">
+
+    <aside class="sidebar" id="sidebar">
+        <h2>Meine Tabellen</h2>
+
+        <div class="table-list" id="tableList"></div>
+
+        <button class="add-table" onclick="openModal()">
+            ＋ Tabelle erstellen
+        </button>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <h2 id="tableTitle">Arbeit</h2>
+
+            <button class="delete-table" onclick="deleteCurrentTable()">
+                🗑 Tabelle löschen
+            </button>
+        </div>
+
+        <div class="todo-container">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>To-do</th>
+                        <th class="checkbox-cell">Erledigt</th>
+                        <th class="checkbox-cell">Dringend</th>
+                        <th class="checkbox-cell">Weniger dringend</th>
+                    </tr>
+                </thead>
+
+                <tbody id="todoBody"></tbody>
+            </table>
+
+            <button class="add-row" onclick="addTodo()">
+                ＋ Neue Aufgabe
+            </button>
+
+        </div>
+
+    </main>
+</div>
+
+<div class="modal-background" id="modalBackground">
+
+    <div class="modal">
+
+        <h3>Neue Tabelle erstellen</h3>
+
+        <input
+            type="text"
+            id="newTableName"
+            placeholder="z. B. Schule"
+        >
+
+        <div class="modal-buttons">
+
+            <button class="cancel" onclick="closeModal()">
+                Abbrechen
+            </button>
+
+            <button class="confirm" onclick="createTable()">
+                Erstellen
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("todoAppData")) || {
+    tables: {
+        "Arbeit": [],
+        "Training": [],
+        "Privates": [],
+        "Ziele": []
+    },
+    currentTable: "Arbeit"
+};
+
+function saveData() {
+    localStorage.setItem("todoAppData", JSON.stringify(data));
+}
+
+function renderTables() {
+
+    const list = document.getElementById("tableList");
+    list.innerHTML = "";
+
+    Object.keys(data.tables).forEach(tableName => {
+
+        const button = document.createElement("button");
+
+        button.className = "table-button";
+
+        if (tableName === data.currentTable) {
+            button.classList.add("active");
+        }
+
+        button.textContent = tableName;
+
+        button.onclick = () => {
+            data.currentTable = tableName;
+            saveData();
+            render();
+        };
+
+        list.appendChild(button);
+    });
+}
+
+function renderTodos() {
+
+    const body = document.getElementById("todoBody");
+
+    body.innerHTML = "";
+
+    const todos = data.tables[data.currentTable];
+
+    todos.forEach((todo, index) => {
+
+        const row = document.createElement("tr");
+
+        if (todo.completed) {
+            row.classList.add("completed");
+        }
+
+        if (todo.urgent) {
+            row.classList.add("urgent");
+        }
+
+        if (todo.lessUrgent) {
+            row.classList.add("less-urgent");
+        }
+
+        row.innerHTML = `
+            <td>
+                <input
+                    class="todo-input"
+                    value="${escapeHtml(todo.text)}"
+                    placeholder="Aufgabe eingeben..."
+                    onchange="updateText(${index}, this.value)"
+                >
+            </td>
+
+            <td class="checkbox-cell">
+                <input
+                    type="checkbox"
+                    ${todo.completed ? "checked" : ""}
+                    onchange="setCompleted(${index}, this.checked)"
+                >
+            </td>
+
+            <td class="checkbox-cell">
+                <input
+                    type="checkbox"
+                    ${todo.urgent ? "checked" : ""}
+                    onchange="setUrgent(${index}, this.checked)"
+                >
+            </td>
+
+            <td class="checkbox-cell">
+                <input
+                    type="checkbox"
+                    ${todo.lessUrgent ? "checked" : ""}
+                    onchange="setLessUrgent(${index}, this.checked)"
+                >
+            </td>
+        `;
+
+        body.appendChild(row);
+    });
+}
+
+function escapeHtml(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+function updateText(index, value) {
+
+    data.tables[data.currentTable][index].text = value;
+
+    saveData();
+}
+
+function setCompleted(index, value) {
+
+    data.tables[data.currentTable][index].completed = value;
+
+    saveData();
+    renderTodos();
+}
+
+function setUrgent(index, value) {
+
+    data.tables[data.currentTable][index].urgent = value;
+
+    if (value) {
+        data.tables[data.currentTable][index].lessUrgent = false;
+    }
+
+    saveData();
+    renderTodos();
+}
+
+function setLessUrgent(index, value) {
+
+    data.tables[data.currentTable][index].lessUrgent = value;
+
+    if (value) {
+        data.tables[data.currentTable][index].urgent = false;
+    }
+
+    saveData();
+    renderTodos();
+}
+
+function addTodo() {
+
+    data.tables[data.currentTable].push({
+        text: "",
+        completed: false,
+        urgent: false,
+        lessUrgent: false
+    });
+
+    saveData();
+    renderTodos();
+
+    setTimeout(() => {
+
+        const inputs = document.querySelectorAll(".todo-input");
+
+        if (inputs.length > 0) {
+            inputs[inputs.length - 1].focus();
+        }
+
+    }, 50);
+}
+
+function openModal() {
+
+    document.getElementById("modalBackground").style.display = "flex";
+
+    document.getElementById("newTableName").value = "";
+
+    document.getElementById("newTableName").focus();
+}
+
+function closeModal() {
+
+    document.getElementById("modalBackground").style.display = "none";
+}
+
+function createTable() {
+
+    const input = document.getElementById("newTableName");
+
+    const name = input.value.trim();
+
+    if (!name) {
+        alert("Bitte gib einen Namen ein.");
+        return;
+    }
+
+    if (data.tables[name]) {
+        alert("Diese Tabelle gibt es bereits.");
+        return;
+    }
+
+    data.tables[name] = [];
+
+    data.currentTable = name;
+
+    saveData();
+
+    closeModal();
+
+    render();
+}
+
+function deleteCurrentTable() {
+
+    const tables = Object.keys(data.tables);
+
+    if (tables.length <= 1) {
+
+        alert("Du musst mindestens eine Tabelle behalten.");
+
+        return;
+    }
+
+    const confirmation = confirm(
+        `Möchtest du die Tabelle "${data.currentTable}" wirklich löschen?`
+    );
+
+    if (!confirmation) {
+        return;
+    }
+
+    delete data.tables[data.currentTable];
+
+    data.currentTable = Object.keys(data.tables)[0];
+
+    saveData();
+
+    render();
+}
+
+function toggleSidebar() {
+
+    const sidebar = document.getElementById("sidebar");
+
+    if (sidebar.style.display === "none") {
+        sidebar.style.display = "block";
+    } else {
+        sidebar.style.display = "none";
+    }
+}
+
+function render() {
+
+    document.getElementById("tableTitle").textContent = data.currentTable;
+
+    renderTables();
+
+    renderTodos();
+}
+
+document
+    .getElementById("newTableName")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            createTable();
+        }
+
+        if (event.key === "Escape") {
+            closeModal();
+        }
+
+    });
+
+render();
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js")
+            .then(() => {
+                console.log("Service Worker erfolgreich registriert.");
+            })
+            .catch(error => {
+                console.error("Service Worker Fehler:", error);
+            });
+    });
+}
+</script>
+
+</body>
+</html>
+```

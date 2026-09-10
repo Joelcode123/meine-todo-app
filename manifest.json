@@ -1,0 +1,18 @@
+{
+  "name": "Meine To-do App",
+  "short_name": "To-do",
+  "description": "Meine persönliche To-do-App",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#111827",
+  "orientation": "portrait",
+  "lang": "de-DE",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
